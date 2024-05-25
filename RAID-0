@@ -1,4 +1,6 @@
-VM images shared image named - RAID-0provision  single disk RAID-0 LAB
+VM images shared image named - RAID-0provision  single disk 
+
+RAID-0 LAB
 
 Create Centos -7 Machine from shared Image
 attached 2 hdd 10GB thin from hdd tab
@@ -21,7 +23,7 @@ mount /dev/md0 /mnt/raid0
   ls –la /mnt/raid0
 mdadm --detail --scan  --verbose   
 
-RAID-1 LAB
+RAID-0 LAB
 Check network if not work deactivate and activate link using nmtui
 ip a
 using nmtui activate and deactivate the network
@@ -48,3 +50,71 @@ download putty and do ssh to vm using VM IP #for check harddrives
    16  clear
    17  mdadm --detail --scan  --verbose
    18  history
+
+
+RAID-1 LAB
+Check network if not work deactivate and activate link using nmtui
+ip a
+using nmtui activate and deactivate the network
+
+download putty and do ssh to vm using VM IP #for check harddrives
+
+
+[root@localhost ~]# history
+    1  lsblk
+    2  yum clean all
+    3  yum update
+    4  clear
+    5  yum install mdadm -y
+    6  clear
+    7 mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+    8  cat /proc/mdstat
+    9  mdadm  --examine /dev/sdb
+   10  mdadm  --examine /dev/sdc
+   11  mdadm  --detail /dev/md0
+   12  mkfs.ext4 /dev/md0
+   13  mkdir /mnt/raid1
+   14  mount /dev/md0 /mnt/raid1
+   15  df -h
+vi  /mnt/raid1/test.txt
+
+#add some content on file
+
+remove one harddrive and check for file status 
+#file should persisit 
+now add one more hard drive 
+and add in your cluster using 
+mdadm --manage /dev/md0 --add /dev/sdb
+
+
+history output 
+
+[root@localhost ~]# history
+    1  yum update
+    2  lsblk
+    3  ip a
+    5   yum install mdadm -y
+    6  clear
+    7  mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+    8  lsblk
+    9  mdadm  --detail /dev/md0
+   10  mkfs.ext4 /dev/md0
+   11  mkdir /mnt/raid1
+   12  mount /dev/md0 /mnt/raid1/
+   13  cd /mnt/raid1/
+   14  ls
+   15  vi test.txt
+   16  cat test.txt
+   17  mdadm  --detail /dev/md0
+   18  halt
+   19  NMTUI
+   20  nmtui
+   21  ip a
+   22  clear
+   23  mdadm  --detail /dev/md0
+   24  lsblk
+   25  clear
+   26  mdadm  --detail /dev/md0
+   27  mdadm --manage /dev/md0 --add /dev/sdb
+   28  mdadm  --detail /dev/md0
+   29  history
