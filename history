@@ -1,0 +1,1677 @@
+
+VM images shared image named - RAID-0provision  single disk 
+
+RAID-0 LAB
+
+Create Centos -7 Machine from shared Image
+attached 2 hdd 10GB thin from hdd tab
+
+lsblk
+yum clean all
+yum update
+yum install mdadm -y
+mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+cat /proc/mdstat
+mdadm  --examine /dev/sdb
+mdadm  --examine /dev/sdc
+mdadm  --detail /dev/md0
+mkfs.ext4 /dev/md0
+Press n 
+Enter enter 
+
+mkfs.ext4 /dev/md0
+mount /dev/md0 /mnt/raid0
+  ls –la /mnt/raid0mdadm --detail --scan  --verbose   
+
+RAID-0 LAB
+Check network if not work deactivate and activate link using nmtui
+ip a
+using nmtui activate and deactivate the network
+
+download putty and do ssh to vm using VM IP #for check harddrives
+
+
+[root@localhost ~]# history
+    1  lsblk
+    2  yum clean all
+    3  yum update
+    4  clear
+    5  yum install mdadm -y
+    6  clear
+    7  mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc
+    8  cat /proc/mdstat
+    9  mdadm  --examine /dev/sdb
+   10  mdadm  --examine /dev/sdc
+   11  mdadm  --detail /dev/md0
+   12  mkfs.ext4 /dev/md0lsb
+   13  mkdir /mnt/raid0
+   14  mount /dev/md0 /mnt/raid0
+   15  df -h
+   16  clear
+   17  mdadm --detail --scan  --verbose
+   18  history
+
+
+RAID-1 LAB
+Check network if not work deactivate and activate link using nmtui
+ip a
+using nmtui activate and deactivate the network
+
+download putty and do ssh to vm using VM IP #for check harddrives
+
+
+[root@localhost ~]# history
+    1  lsblk
+    2  yum clean all
+    3  yum update
+    4  clear
+    5  yum install mdadm -y
+    6  clear
+    7 mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+    8  cat /proc/mdstat
+    9  mdadm  --examine /dev/sdb
+   10  mdadm  --examine /dev/sdc
+   11  mdadm  --detail /dev/md0
+   12  mkfs.ext4 /dev/md0
+   13  mkdir /mnt/raid1
+   14  mount /dev/md0 /mnt/raid1
+   15  df -h
+vi  /mnt/raid1/test.txt
+
+#add some content on file
+
+remove one harddrive and check for file status 
+#file should persisit 
+now add one more hard drive 
+and add in your cluster using 
+mdadm --manage /dev/md0 --add /dev/sdb
+
+
+history output 
+
+[root@localhost ~]# history
+    1  yum update
+    2  lsblk
+    3  ip a
+    5   yum install mdadm -y
+    6  clear
+    7  mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc
+    8  lsblk
+    9  mdadm  --detail /dev/md0
+   10  mkfs.ext4 /dev/md0
+   11  mkdir /mnt/raid1
+   12  mount /dev/md0 /mnt/raid1/
+   13  cd /mnt/raid1/
+   14  ls
+   15  vi test.txt 
+   16  cat test.txt
+   17  mdadm  --detail /dev/md0
+   18  halt
+   19  NMTUI 
+   20  nmtui
+   21  ip a
+   22  clear
+   23  mdadm  --detail /dev/md0
+   24  lsblk
+   25  clear
+   26  mdadm  --detail /dev/md0
+   27  mdadm --manage /dev/md0 --add /dev/sdc
+   28  mdadm  --detail /dev/md0
+   29  history
+
+RAID-5 LAB
+ADD four hdd of 10GB
+Check network if not work deactivate and activate link using nmtui
+ip a
+using nmtui activate and deactivate the network 
+
+download putty and do ssh to vm using VM IP #for check harddrives
+
+
+[root@localhost ~]# history
+- █  
+
+    1  lsblk
+    2  yum clean all
+    3  yum update
+    4  clear
+    5  y
+    6  clear
+    7 mdadm --create --verbose /dev/md0 --level=5 --raid-devices=3 /dev/sdb /dev/sdc /dev/sdd --spare-devices=1 /dev/sde
+
+    8  cat /proc/mdstat
+    9  mdadm  --examine /dev/sdb
+   10  mdadm  --examine /dev/sdc
+   mdadm  --examine /dev/sdd
+   mdadm  --examine /dev/sde
+   11  mdadm  --detail /dev/md0
+   12  mkfs.ext4 /dev/md0
+   13  mkdir /mnt/raid5
+   14  mount /dev/md0 /mnt/raid5
+   15  df -h
+vi  /mnt/raid5/test.txt
+
+#add some content on file
+lsblk
+remove one harddrive and check for file status 
+#file should persisit 
+now add one more hard drive 
+and add in your cluster using 
+mdadm --manage /dev/md0 --add /dev/sdf
+
+
+LVM
+
+lvs
+pvs
+lvdisplay
+pvdisplay
+vgs
+vgdisplay 
+
+
+1. Identify the new hard disks:
+
+This is achieved using the `lsblk` command. `lsblk` lists information about all available or the specified block devices. It reads the sysfs filesystem and udev db to gather information.
+
+
+[root@nfs-client ~]# lsblk
+
+
+Here, `sdb` and `sdc` are the new hard disks that you want to add.
+
+2. Create physical volumes:
+
+This is done with `pvcreate`. This initializes physical volume(s) for later use by the Logical Volume Manager (LVM). Each physical volume can be a disk partition, whole disk, meta-device, or loopback file.
+
+
+pvcreate /dev/sdb /dev/sdc
+pvs
+
+pvdisplay command for view volumes
+3. Create a volume group:
+
+`vgcreate` creates a new volume group named HPCSA on physical volumes /dev/sdb and /dev/sdc.
+
+
+vgcreate HPCSA /dev/sdb /dev/sdc
+vgs
+
+
+4. Create a logical volume:
+
+`lvcreate` creates a logical volume in a volume group. In this case, it's creating a logical volume named `hpcsa_lab` with a size of 1G in the volume group `HPCSA`.
+
+
+lvcreate -n hpcsa_lab --size 1G HPCSA
+lvs
+
+
+6. Create a filesystem:
+
+`mkfs.ext4` is used to create an ext4 filesystem on the partition.
+or mkfs.xfs
+
+mkfs.ext4 /dev/mapper/HPCSA-hpcsa_lab
+
+
+7. Create a mount point and mount the logical volume:
+lsblk
+Create a directory that will serve as the mount point, and then use the `mount` command to mount the logical volume.
+
+
+mkdir lab
+mount /dev/mapper/HPCSA-hpcsa_lab lab
+
+
+8. Extend the logical volume:
+
+`lvextend` allows you to extend the size of a logical volume. Here, you're extending the logical volume `hpcsa_lab` by an additional 2G.
+
+
+lvextend -L +2G /dev/mapper/HPCSA-hpcsa_lab
+lvs
+
+9. Resize the filesystem:
+
+`resizefs` resizes the filesystem on the logical volume to use all of the available space.
+xfs_growfs to extend xfs
+
+resize2fs /dev/mapper/HPCSA-hpcsa_lab
+
+
+10. Create a snapshot:
+
+`lvcreate` with `-s` creates a snapshot logical volume, which is a read-only copy of another logical volume.
+
+
+lvcreate -L 1GB -s -n hpcsa_lab_snap /dev/mapper/HPCSA-hpcsa_lab
+
+
+11. Merge the snapshot:
+
+`lvconvert` with `--merge` will merge the snapshot back into its origin volume. If both origin and snapshot volume are not open the merge will start immediately, otherwise, it will be delayed until the origin volume becomes inactive.
+l
+
+lvconvert --merge /dev/mapper/HPCSA-hpcsa_lab_snap
+
+
+Remember to add the disks to `/etc/fstab` if you want them to be mounted automatically at system startup.
+
+
+[root@localhost ~]# lsblk
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0   20G  0 disk
+├─sda1            8:1    0    1G  0 part /boot
+└─sda2            8:2    0   19G  0 part
+  ├─centos-root 253:0    0   17G  0 lvm  /
+  └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
+sdb               8:16   0   20G  0 disk
+sdc               8:32   0   20G  0 disk
+sdd               8:48   0   20G  0 disk
+sr0              11:0    1  973M  0 rom
+[root@localhost ~]# vgcreate HPCSA /dev/sdb /dev/sdclsblk
+  Physical volume "/dev/sdb" successfully created.
+  Physical volume "/dev/sdc" successfully created.
+  Volume group "HPCSA" successfully created
+[root@localhost ~]# vgs
+  VG     #PV #LV #SN Attr   VSize   VFree
+  HPCSA    2   0   0 wz--n-  39.99g 39.99g
+  centos   1   2   0 wz--n- <19.00g     0
+[root@localhost ~]# vgextend HPCSA /dev/sdd
+  Physical volume "/dev/sdd" successfully created.
+  Volume group "HPCSA" successfully extended
+[root@localhost ~]# vgs
+  VG     #PV #LV #SN Attr   VSize   VFree
+  HPCSA    3   0   0 wz--n- <59.99g <59.99g
+  centos   1   2   0 wz--n- <19.00g      0
+[root@localhost ~]#
+
+
+[root@localhost ~]# lvconvert --merge /dev/mapper/HPCSA-hpcsa_lab
+HPCSA-hpcsa_lab           HPCSA-hpcsa_lab_snap
+HPCSA-hpcsa_lab-real      HPCSA-hpcsa_lab_snap-cow
+[root@localhost ~]# lvconvert --merge /dev/mapper/HPCSA-hpcsa_lab
+HPCSA-hpcsa_lab           HPCSA-hpcsa_lab_snap
+HPCSA-hpcsa_lab-real      HPCSA-hpcsa_lab_snap-cow
+[root@localhost ~]# lvconvert --merge /dev/mapper/HPCSA-hpcsa_lab_snap
+  Merging of volume HPCSA/hpcsa_lab_snap started.
+  HPCSA/hpcsa_lab: Merged: 100.00%
+  
+  
+  
+  
+  
+pvcreate /dev/sdb /dev/sdc
+vgcreate HPCSA /dev/sdb /dev/sdc
+lvcreate -n hpcsa_lab --size 1G HPCSA    
+
+[root@localhost lvm]# history
+    1  nmtui
+    2  ip a
+    3  clear
+    4  lsblk
+    5  pvcreate /dev/sdb /dev/sdc
+    6  pvs
+    7  vgcreate HPCSA /dev/sdb /dev/sdc
+    8  clear
+    9  vgs
+   10  lvcreate -n hpcsa_lab --size 1G HPCSA
+   11  lvs
+   12  clear
+   13  lvs
+   14  fdisk /dev/HPCSA/hpcsa_lab
+   15  fdisk -l
+   16  mkfs.ext4 /dev/mapper/HPCSA-hpcsa_lab
+   17  fdisk -l
+   18  fdisk /dev/mapper/HPCSA-hpcsa_lab
+   19  exit
+   20  fdisk /dev/mapper/HPCSA-hpcsa_lab
+   21  reboot
+   22  clear
+   23  lsblk
+   24  fdisk -l
+   25  mkfs.ext4 /dev/mapper/HPCSA-hpcsa_lab
+   26  df -hj
+   27  df -h
+   28  clear
+   29  mkdir /mnt/lvm
+   30  mount /dev/mapper/HPCSA-hpcsa_lab /mnt/lvm/
+   31  df -h
+   32  cd /mnt/lvm/
+   33  ls
+   34  echo "test data" > test.txt
+   35  cat test.txt
+   36  clear
+   37  lvs
+   38  lvextend -L +2G /dev/mapper/HPCSA-hpcsa_lab
+   39  lvs
+   40  df -h
+   41  resize2fs /dev/mapper/HPCSA-hpcsa_lab
+   42  df -h
+   43  clear
+   44  history
+   45  clear
+   46  lsblk
+   47  pvs
+   48  pvdisplay
+   49  pvcreate /dev/sdd
+   50  vgextend HPCSA /dev/sdd
+   51  vgs
+   52  history
+
+Download true nas
+
+https://download-core.sys.truenas.net/13.0/STABLE/U6.1/x64/TrueNAS-13.0-U6.1.iso
+
+
+ yum install iscsi-initiator-utils
+ cat /etc/iscsi/initiatorname.iscsi
+iscsiadm -m node -p  192.168.82.93 --login
+
+
+    2  clea
+    4  ip a
+    5  clear
+    6  cat /etc/iscsi/initiatorname.iscsi
+    7  iscsiadm -m discovery -t st -p 192.168.82.93
+    8  iscsiadm -p  192.168.82.93 --login
+    9  iscsiadm -m node -p  192.168.82.93 --login
+   10  clear
+   11  lsblk
+   12  fdisk /dev/sdb
+   13  clear
+   14  fdisk -l
+   15  mkfs.ext4 /dev/sdb1
+   16  mkdir /mnt/iscsi-disk
+   17  mount /dev/sdb1 /mnt/iscsi-disk/
+   18  df -h
+   19  history
+
+ iscsi configuration on centos7
+------------------------------
+
+*****On iscsi-client*****
+-------------------------
+
+# yum install iscsi-initiator-utils -y
+ 
+ cd /etc/iscsi
+
+# vi initiatorname.iscsi                        >> # change client name to >>  iqn.2022-12.acts.student:306631cea220
+
+# systemctl start iscsi
+
+# systemctl status iscsi
+
+*****On iscsi-server*****
+-------------------------
+
+(Add Two Hard disk sdb and sdc of 20GB each)
+
+
+# lsblk     or  # sfdisk -s
+
+# fdisk -l
+
+#  fdisk -l
+
+# pvcreate /dev/sdb /dev/sdc
+
+# vgcreate vg_iscsi /dev/sdb /dev/sdc
+
+# lvcreate -n lv_iscsi-disk-01 L 1G vg_iscsi
+
+# vgcreate vg_iscsi /dev/sdb /dev/sdc
+
+# lvcreate -n lv_iscsi-disk-01 -L 1G vg_iscsi
+
+# lvs                               --> show partitions
+
+# yum install targetcli -y
+
+# targetcli
+
+/> cd backstores/block
+
+>  create /backstores/block/block1
+
+> create block1 /dev/mapper/vg_iscsi-lv_iscsi--disk--01
+
+> cd ../../iscsi
+
+> create iqn.2024-05.cdac.acts.hpcsa.sbm:disk1
+
+> cd iqn.2024-05.cdac.acts.hpcsa.sbm:disk1/tpg1/acls
+
+> create iqn.1994-05.com.redhat:c6aff3ec483b
+
+ cd .>.
+
+> cd iqn.2022-12.cdac.acts.hpcsa.sbm:disk1/tpg1/luns
+
+
+> exit
+
+
+# systemctl start target
+
+# systemctl status target
+
+systemctl stop firewalld
+
+*****On iscsi-client*****
+-------------------------
+
+# iscsiadm -m discovery -t st -p 192.168.82.112 --login                -->  #XXX=server IP :: Note Ensure firewalld service is disabled on both the machines
+
+# fdisk -l
+
+# fdisk /dev/sdx                                                       --> #use X=iscsi mount disk
+
+# #Press :n then enter entersystemc        
+  #Press key :w
+ 
+# fdisk -l
+
+# mkdir /mnt/disk-1
+
+# mkfs.xfs -f /dev/sdx     or  # mkfs.ext4 /dev/sdx
+
+# mount /dev/sdx /mnt/disk-1/
+
+# df -Th
+
+
+   25   iscsiadm -m discovery -t st -p 192.168.82.202
+   26  ip a
+   27  ping 192.168.82.202
+   28  clear
+   29   iscsiadm -m discovery -t st -p 192.168.82.202
+   30  history
+   31  clear
+   32   iscsiadm -m node -p  192.168.82.202 --login
+   33  clear
+   34  lsblk
+   35  iscsiadm -m session
+   36  iscsiadm -m session -p 2
+   37  iscsiadm -m session -p 1
+   38  iscsiadm -m session -P 2
+   39  clear
+   40  iscsiadm -m session
+   41  iscsiadm -m session -r 2 -u
+   42  history
+
+
+======================================================================================== iscsi configuration on centos7==========================================================================================
+------------------------------
+
+*****On iscsi-client*****
+-------------------------
+
+# yum install iscsi-initiator-utils -y
+
+# cd /etc/iscsi
+
+# vi initiatorname.iscsi                        >> # change client name to >>  iqn.2022-12.acts.student:306631cea220
+
+# systemctl start iscsi
+
+# systemctl status iscsi
+
+*****On iscsi-server*****
+-------------------------
+
+(Add Two Hard disk sdb and sdc of 20GB each)
+
+
+# lsblk     or  # sfdisk -s
+
+# fdisk -l
+
+# pvcreate /dev/sdb /dev/sdc
+
+# vgcreate vg_iscsi /dev/sdb /dev/sdc
+
+# lvcreate -n lv_iscsi-disk-01 -L 1G vg_iscsi
+
+# lvs                               --> show partitions
+
+# yum install targetcli -y
+
+# targetcli
+
+/> cd backstores/block
+
+> create block1 /dev/mapper/vg_iscsi-lv_iscsi--disk--01
+
+> cd ../../iscsi
+
+> create iqn.2022-12.cdac.acts.hpcsa.sbm:disk1
+
+> cd iqn.2022-12.cdac.acts.hpcsa.sbm:disk1/tpg1/acls
+
+> create iqn.2022-12.acts.student:306631cea220
+
+> cd ..
+
+> cd iqn.2022-12.cdac.acts.hpcsa.sbm:disk1/tpg1/luns
+
+> create /backstores/block/block1
+>ls
+> exit
+
+
+# systemctl start target
+
+# systemctl status target
+
+
+
+*****On iscsi-client*****
+-------------------------
+
+# iscsiadm -m discovery -t st -p 192.168.82.112 --login                -->  #XXX=server IP :: Note Ensure firewalld service is disabled on both the machines
+
+# fdisk -l
+
+# fdisk /dev/sdx                                                       --> #use X=iscsi mount disk
+
+# #Press :n then enter entersystemc        
+  #Press key :w
+ 
+# fdisk -l
+
+# mkdir /mnt/disk-1
+
+# mkfs.xfs -f /dev/sdx     or  # mkfs.ext4 /dev/sdx
+
+# mount /dev/sdx /mnt/disk-1/
+
+# df -Th
+
+============================================================================================================gluster===================================================================================================
+
+ADD new HDD on all severs
+
+mkdir /mnt/disk1
+ 
+#format and create filesystem in disk1
+#mount /dev/sdb1 /mnt/disk1
+
+
+#nano /etc/hosts
+
+192.168.76.xxx  server1.hpcsa.com server1
+192.168.76.xxx  server2.hpcsa.com server2
+192.168.76.xxx  server3.hpcsa.com server3
+192.168.76.xxx  client.hpcsa.com client
+systemctl stop firewalld
+
+
+# yum install wget
+# yum install centos-release-gluster -y
+# yum install epel-release -y
+# yum install glusterfs-server -y
+
+# systemctl start glusterd
+# systemctl enable glusterd
+
+gluster peer probe server2.hpcsa.com
+gluster peer probe server3.hpcsa.com
+
+gluster peer status
+gluster pool list
+
+mkdir -p /mnt/disk1/diskvol
+
+gluster volume create gdisk2 replica 3 server1.hpcsa.com:/mnt/disk1/diskvol/gdisk2  server2.hpcsa.com:/mnt/disk1/diskvol/gdisk2  server3.hpcsa.com:/mnt/disk1/diskvol/gdisk2
+gluster volume start gdisk2
+
+gluster volume info gdisk2
+
+#on client 
+yum install glusterfs-fuse
+
+mkdir /mnt/gdrive
+mount -t glusterfs server1:/gdisk1 /mnt/gdrive
+
+ dd if=/dev/zero of=blockfile bs=500M count=2
+
+
+    1  systemctl stop firewalld
+    2  yum install wget
+    3  yum install centos-release-gluster -y
+    4  yum install epel-release -y
+    5  yum install glusterfs-server -y
+    6  systemctl start glusterd
+    7  systemctl enable glusterd && systemctl status glusterd
+    8  yum install glusterfs-fuse
+    9  mkdir /mnt/gdrive
+   10  mount -t glusterfs server1:/gdisk2 /mnt/gdrive
+   11  clear
+   12  df -h
+   13  cd /mnt/gdrive
+   14  ls
+   15  pwd
+   16  cd /mnt/gdrive/
+   17  dd if=/dev/zero of=blockfile bs=500M count=2
+   18  ls
+   19  history
+
+
+GlusterFS Practical
+ 
+Required Machines
+Storage1 : 1GB RAM, 20+20 GB HDD, NAT
+Storage2  : 1GB RAM, 20+20 GB HDD, NAT
+Storage3  : 1GB RAM, 20+20 GB HDD, NAT
+Client : 1GB RAM, 20 GB HDD, NAT
+ 
+On All Machines
+# systemctl stop firewalld.service && systemctl disable firewalld.service
+#yum install rsync -y
+ 
+On Storage1 Machine
+# vi /etc/hosts
+192.168.44.160 node1.hpcsa.in
+192.168.44.161 node2.hpcsa.in
+192.168.44.162 node3.hpcsa.in
+192.168.44.163 client.hpcsa.in
+ 
+# rsync /etc/hosts root@node2.hpcsa.in:/etc/hosts
+# rsync /etc/hosts root@node3.hpcsa.in:/etc/hosts
+# rsync /etc/hosts root@client.hpcsa.in:/etc/hosts
+ 
+On Storage 1,2,3 Machines
+# fdisk /dev/sdb
+# mkfs.ext4 /dev/sdb1
+# mkdir /mnt/disk1
+# mount /dev/sdb1 /mnt/disk1
+# lsblk
+# yum install centos-release-gluster -y
+# yum install epel-release -y
+# yum install glusterfs-server -y
+# systemctl stop firewalld && systemctl disable firewalld && systemctl start glusterd.service && systemctl enable glusterd.service && systemctl status glusterd.service && systemctl status firewalld
+ 
+ 
+On Storage 1 Machines
+# gluster peer probe node2.hpcsa.in
+# gluster peer probe node3.hpcsa.in
+# gluster pool list
+# gluster peer status
+On All storage Machines
+# mkdir /mnt/disk1/diskvol
+ 
+Replication
+On Storage 1 Machines
+# gluster volume create gdisk1 replica 3 node1.hpcsa.in:/mnt/disk1/diskvol/gdisk1 node2.hpcsa.in:/mnt/disk1/diskvol/gdisk1 node3.hpcsa.in:/mnt/disk1/diskvol/gdisk1
+# gluster volume start gdisk1
+# gluster volume info gdisk1
+ 
+On Client Machine
+# yum install glusterfs-fuse -y
+# mkdir /mnt/gdrive
+# mount -t glusterfs node1.hpcsa.in:/gdisk1 /mnt/gdrive
+# df –h
+# cd /mnt/gdrive/
+# dd if=/dev/zero of=file.txt bs=1024 count=1024 
+Now you can check same file in this path /mnt/disk1/diskvol/gdisk1/ in all 3 stoarage nodes  
+Distributed
+On Storage 1 Machines
+# gluster volume create gdisk2 node1.hpcsa.in:/mnt/disk1/diskvol/gdisk2 node2.hpcsa.in:/mnt/disk1/diskvol/gdisk2 node3.hpcsa.in:/mnt/disk1/diskvol/gdisk2
+# gluster volume start gdisk2
+# gluster volume info gdisk2
+On Client Machine
+# mkdir /mnt/distribute
+# mount -t glusterfs node1.hpcsa.in:/gdisk2 /mnt/distribute
+# df –h
+# cd /mnt/distribute/
+# dd if=/dev/zero of=file.txt bs=1024 count=1024 
+# dd if=/dev/zero of=file1.txt bs=1024 count=1024
+# dd if=/dev/zero of=file2.txt bs=1024 count=1024
+# dd if=/dev/zero of=file3.txt bs=1024 count=1024
+# dd if=/dev/zero of=file4.txt bs=1024 count=1024
+Now all your 5 files are distributed in all 3 storage machines randomly and you can check it distributed files in this path  /mnt/disk1/diskvol/gdisk2/   of all 3 machines
+Disperse
+On Storage 1 Machines
+# gluster volume create gdisk3 disperse 3 node1.hpcsa.in:/mnt/disk1/diskvol/gdisk3 node2.hpcsa.in:/mnt/disk1/diskvol/gdisk3 node3.hpcsa.in:/mnt/disk1/diskvol/gdisk3
+# gluster volume start gdisk3
+# gluster volume info gdisk3
+ 
+On Client Machine
+# mkdir /mnt/disperse
+# mount -t glusterfs node1.hpcsa.in:/gdisk1 /mnt/disperse
+# df –h
+# cd /mnt/disperse/
+# dd if=/dev/zero of=file.txt bs=1024 count=1024 
+ 
+Now in 2 storage nodes file will be stored in disperse mode & in remaining node parity of the file will be store
+ 
+ 
+ 
+ 
+ yum install nano wget && wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo
+ 
+ 
+ 
+ 
+ http://www.beegfs.io/wiki/ManualInstallWalkThrough
+
+
+1. Download BeeGFS Repository:
+    To start with, we will download the BeeGFS repository to our system:
+
+    yum install nano wget
+    wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo
+    
+
+    Please replace "7.2" with the current BeeGFS version, and "rhel7" with your OS version.
+
+2. Install BeeGFS Packages on server client:
+    Install BeeGFS packages with the following commands:
+
+    on client machine
+    yum install beegfs-utils beegfs-client
+    on bgfs mets
+     yum install beegfs-meta 
+     on storage 
+     yum install beegfs-storage 
+     on MGMT
+     yum install beegfs-mgmtd
+
+3. Configure BeeGFS:
+    Now, we will configure the metadata server (MDS), storage server (SS), and client. You will need to replace `<MDS IP>`, `<SS IP>`, and `<client IP>` with your server vm IPs.
+        mkdir -p /mnt/beegfs/meta && mkdir -p /mnt/beegfs/storage && mkdir -p /mnt/beegfs/beegfs_mgmtd
+        /opt/beegfs/sbin/beegfs-setup-mgmtd -p /mnt/beegfs/beegfs_mgmtd
+        
+        
+         
+        open this file nano  /opt/beegfs/sbin/beegfs-setup-mgmtd -p /mnt/beegfs/beegfs_mgmtd
+
+        add entry --> sysMgmtdHost = "your server VM IP"
+        
+        systemctl start beegfs-mgmtd &&     systemctl enable beegfs-mgmtd &&     systemctl status beegfs-mgmtd
+
+        
+         
+    On the metadata server:
+
+ 
+    /opt/beegfs/sbin/beegfs-setup-meta -p /mnt/beegfs/meta -s 1 -m <MDS IP>
+    
+    systemctl start beegfs-meta && systemctl enable beegfs-meta && systemctl status beegfs-meta
+    
+
+    On the storage server:
+
+    
+    /opt/beegfs/sbin/beegfs-setup-storage -p /mnt/beegfs/storage -s 2 -i 1 -m <MDS IP>
+    
+    systemctl start beegfs-storage && systemctl enable beegfs-storage && systemctl status beegfs-storage
+
+
+    On the client machine:
+    yum install nano wget
+    
+    wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo   
+
+    yum install -y kernel-devel beegfs-utils beegfs-client beegfs-mgmtd
+        
+         rm /lib/modules/3.10.0-1160.el7.x86_64/build
+         ln -s /usr/src/kernels/3.10.0-1160.92.1.el7.x86_64/ /lib/modules/3.10.0-1160.el7.x86_64/build
+         /etc/init.d/beegfs-client rebuild
+    
+    /opt/beegfs/sbin/beegfs-setup-client -m <MDS IP> 
+        
+    mkdir /mnt/beegfs
+    
+    systemctl start beegfs-client
+    systemctl enable beegfs-client
+        
+
+4. Start BeeGFS Services:
+    On the metadata server and storage server:
+
+    
+  
+
+    systemctl start beegfs-storage
+    systemctl enable beegfs-storage
+    
+
+    On the client:
+
+    nano /etc/beegfs/beegfs-client.conf
+    systemctl start beegfs-client
+    systemctl enable beegfs-client
+    
+
+5. Check Your Installation:
+    After starting BeeGFS, you can check your installation using the following command on any of the servers:
+
+
+
+   11  yum install nano wget
+   12  clear
+   13  systemctl stop firewalld &&  systemctl disable firewalld
+   14   wget --no-check-certificate -O /etc/yum.repos.d/beegfs.repo https://www.beegfs.io/release/beegfs_7.2/dists/beegfs-rhel7.repo
+   15      cat /etc/yum.repos.d/beegfs.repo
+   16  clear
+   17  yum install beegfs-utils beegfs-client beegfs-meta beegfs-storage beegfs-mgmtd
+   18          mkdir -p /mnt/beegfs/meta && mkdir -p /mnt/beegfs/storage && mkdir -p /mnt/beegfs/beegfs_mgmtd
+   19  df -h
+   20  clearkkk
+   21  /opt/beegfs/sbin/beegfs-setup-mgmtd -p /mnt/beegfs/beegfs_mgmtd
+   22  cat  /etc/beegfs/beegfs-mgmtd.conf
+   23  clear
+   24  nano /etc/beegfs/beegfs-mgmtd.conf
+   25  nano /etc/beegfs/beegfs-client
+   26  nano /etc/beegfs/beegfs-client.conf
+   27  systemctl start beegfs-mgmtd &&     systemctl enable beegfs-mgmtd &&     systemctl status beegfs-mgmtd
+   28  /opt/beegfs/sbin/beegfs-setup-meta -p /mnt/beegfs/meta -s 1 -m 192.168.100.154
+   29  nano /etc/beegfs/beegfs-m
+   30  nano /etc/beegfs/beegfs-meta.conf
+   31  systemctl start beegfs-meta && systemctl enable beegfs-meta && systemctl status beegfs-meta
+   32   /opt/beegfs/sbin/beegfs-setup-storage -p /mnt/beegfs/storage -s 2 -i 1 -m 192.168.100.154
+   33    systemctl start beegfs-storage && systemctl enable beegfs-storage && systemctl status beegfs-storage
+   34  clear
+   35  beegfs-check-servers
+   36  beegfs-ctl --listnodes --nodetype=storage
+   37  beegfs-ctl --listnodes --nodetype=storage --nicdetails
+   38  history
+   
+   
+   
+   
+   Client 
+   
+   
+   
+      31  yum install -y kernel-devel beegfs-utils beegfs-client beegfs-mgmtd
+   32  /opt/beegfs/sbin/beegfs-setup-client -m 192.168.100.154
+   33  nano /etc/beegfs/beegfs-mounts.conf
+   34  cd /mnt/beegfs/
+   35  ls
+   36  systemctl start beegfs-client
+   37  journalctl -xe
+   38  history
+
+ 
+ 
+ 
+ ===================================================================
+ 
+ 
+ ON MGMT and META Server
+ systemctl stop firewalld && systemctl disable firewalld
+yum install nano wget  
+cd /etc/yum.repos.d/
+ sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+ sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+ wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+ yum install -y beegfs-mgmtd beegfs-meta 
+ mkdir -p /data/beegfs/beegfs_mgmtd
+ mkdir -p /data/beegfs/beegfs_meta
+ /etc/hosts
+ 192.168.82.120 beegfs-mgmt-meta-srv-01
+192.168.82.50 beegfs-storage-01
+192.168.82.43 beegfs-storage-02
+192.168.82.91 beegfs-client-01
+
+ dd if=/dev/random of=/etc/beegfs/connauthfile bs=128 count=1 
+ chown root:root /etc/beegfs/connauthfile 
+ chmod 400 /etc/beegfs/connauthfile
+# make entry of connauthfile path below two files
+/etc/beegfs/beegfs-mgmtd.conf
+/etc/beegfs/beegfs-meta.conf
+
+
+cd /opt/beegfs/sbin
+ ./beegfs-setup-mgmtd -p /data/beegfs/beegfs_mgmtd
+   systemctl start beegfs-mgmtd && systemctl status beegfs-mgmtd
+./beegfs-setup-meta -p /data/beegfs/beegfs_meta -s 1 -m beegfs-mgmt-meta-srv-01 -f
+ systemctl start beegfs-meta && systemctl status beegfs-meta
+ 
+ ON storage node 01
+ systemctl stop firewalld && systemctl disable firewalld
+yum install nano wget  
+
+ sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+ sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+ wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+ yum install -y beegfs-storage
+ #copy connauth file from meta node to storage node
+  nano /etc/beegfs/beegfs-storage.conf
+#configure connauth file location
+mkfs.xfs /dev/nvme0n2
+mkfs.xfs /dev/nvme0n3
+mkdir /mnt/raid1
+mkdir /mnt/raid2
+mount /dev/nvme0n2 /mnt/raid1
+mount /dev/nvme0n3 /mnt/raid2
+cd /opt/beegfs/sbin/
+./beegfs-setup-storage -p /mnt/raid1/ -s 4 -i 301 -m beegfs-mgmt-meta-srv-01
+ ./beegfs-setup-storage -p /mnt/raid2/ -s 4 -i 302 -m beegfs-mgmt-meta-srv-01
+ systemctl start beegfs-storage && systemctl status beegfs-storage
+
+
+ ON storage node 02
+ systemctl stop firewalld && systemctl disable firewalld
+yum install nano wget  
+cd /etc/yum.repos.d/
+ sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+ sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+ wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+ yum install -y beegfs-storage
+ #copy connauth file from meta node to storage node
+  nano /etc/beegfs/beegfs-storage.conf
+#configure connauth file location
+mkfs.xfs /dev/nvme0n2
+ mkfs.xfs /dev/nvme0n3
+mkdir /mnt/raid1
+mkdir /mnt/raid2
+mount /dev/nvme0n2 /mnt/raid1
+mount /dev/nvme0n3 /mnt/raid2
+cd /opt/beegfs/sbin/
+./beegfs-setup-storage -p /mnt/raid1/ -s 4 -i 401 -m beegfs-mgmt-meta-srv-01
+ ./beegfs-setup-storage -p /mnt/raid2/ -s 4 -i 402 -m beegfs-mgmt-meta-srv-01
+ systemctl start beegfs-storage && systemctl status beegfs-storage
+ 
+  ON client node
+disable selinux 
+ systemctl stop firewalld && systemctl disable firewalld
+
+cd /etc/yum.repos.d/
+ sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+ sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+  yum install nano wget  
+ wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+
+yum install -y kernel-devel beegfs-helperd beegfs-client beegfs-utils
+rm /lib/modules/4.18.0-532.el8.x86_64/build
+ln -s /usr/src/kernels/4.18.0-553.6.1.el8.x86_64 /lib/modules/4.18.0-532.el8.x86_64/build
+#copy and configure connauth file 
+cd /opt/beegfs/sbin/
+./beegfs-setup-client -m beegfs-mgmt-meta-srv-01
+/etc/init.d/beegfs-client rebuild
+ systemctl start beegfs-helperd
+systemctl start beegfs-client
+  
+ 
+ 
+ 
+ 
+ 
+ =========On single Node========
+ 
+ 1  clear
+    2  cd /etc/yum.repos.d/
+    3   sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    4   sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+    5   wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+    6  yum install wget
+    7   wget https://www.beegfs.io/release/beegfs_7.4.2/dists/beegfs-rhel8.repo
+    8  ls
+    9  yum install nano
+   10  clear
+   11   yum install -y beegfs-mgmtd beegfs-meta
+   12   yum install -y beegfs-storage beegfs-client beegfs-helperd
+   13  clear
+   14  mkdir -p /data/beegfs/beegfs_mgmtd
+   15   mkdir -p /data/beegfs/beegfs_meta
+   16  hostnamectl set-hostname beegfs-mgmt-meta-srv-01
+   17  ip a
+   18  nano /etc/hosts
+   19  clear
+   20  dd if=/dev/random of=/etc/beegfs/connauthfile bs=128 count=1
+   21   chown root:root /etc/beegfs/connauthfile
+   22   chmod 400 /etc/beegfs/connauthfile
+   23  cd /etc/beegfs/
+   24  ls
+   25  nano /etc/beegfs/beegfs-mgmtd.conf
+   26  nano /etc/beegfs/beegfs-meta.conf.conf
+   27  nano /etc/beegfs/beegfs-meta.conf
+   28  hostname
+   29  systemctl disable firewalld
+   30  systemctl stop firewalld
+   31  clear
+   32  cd /opt/beegfs/
+   33  ls
+   34  cd sbin/
+   35  ls
+   36  ./beegfs-setup-mgmtd -p /data/beegfs/beegfs_mgmtd
+   37  ./beegfs-setup-meta -p /data/beegfs/beegfs_meta -s 1 -m beegfs-mgmt-meta-srv-01 -f
+   38     systemctl start beegfs-mgmtd && systemctl status beegfs-mgmtd
+   39     systemctl start beegfs-mgmtd
+   40     systemctl status beegfs-mgmtd
+   41  nano /etc/beegfs/beegfs-mgmtd.conf
+   42     systemctl start beegfs-mgmtd
+   43     systemctl status beegfs-mgmtd
+   44     systemctl start beegfs-meta
+   45     systemctl status beegfs-meta
+   46  clear
+   47  mkfs.xfs /dev/nvme0n2
+   48  mkfs.xfs /dev/nvme0n3
+   49  mkdir /mnt/raid1
+   50  mkdir /mnt/raid2
+   51  mount /dev/nvme0n2 /mnt/raid1
+   52  mount /dev/nvme0n3 /mnt/raid2
+   53  nano /etc/beegfs/beegfs-storage.conf
+   54  ./beegfs-setup-storage -p /mnt/raid1/ -s 4 -i 301 -m beegfs-mgmt-meta-srv-01
+   55  ./beegfs-setup-storage -p /mnt/raid2/ -s 4 -i 302 -m beegfs-mgmt-meta-srv-01
+   56  systemctl start beegfs-storage && systemctl status beegfs-storage
+   57  nano /etc/beegfs/beegfs-helperd.conf
+   58  nano /etc/beegfs/beegfs-client.conf
+   59  clear
+   60  ./beegfs-setup-client -m beegfs-mgmt-meta-srv-01
+   61  ls
+   62  yum install beegfs-utils
+   63  beegfs-ctl
+   64  beegfs-ctl --listnodes --nodetype=client --nicdetails
+   65  beegfs-df
+   66  beegfs-ctl --listnodes --nodetype=storage
+   67  clear
+   68  history
+
+
+
+
+
+Step 1: Install Ceph on All Nodes
+
+1.Add the Ceph Quincy release and install Ceph on all nodes (node1, node2, and node3):
+
+    sudo yum install -y centos-release-ceph-quincy podman
+    sudo yum update -y
+    sudo yum install -y cephadm
+
+
+
+1.Update `/etc/hosts` with node details:
+
+    echo "192.168.1.101 node1" | sudo tee -a /etc/hosts
+    echo "192.168.1.102 node2" | sudo tee -a /etc/hosts
+    echo "192.168.1.103 node3" | sudo tee -a /etc/hosts
+
+
+Step 2: SSH Configuration
+.Generate SSH keys and copy to nodes:
+
+    ssh-keygen
+    ssh-copy-id root@node-1
+    ssh-copy-id root@node-2
+    ssh-copy-id root@node-3
+
+
+
+
+Step 3: Ceph Cluster Deployment
+
+1.Bootstrap the Ceph cluster on the admin node:
+
+  cephadm bootstrap --mon-ip 192.168.1.101
+
+
+2.Copy the configuration and keyring to other nodes:
+   /usr/sbin/cephadm shell
+   ceph cephadm get-pub-key > ceph.pub
+   ssh-copy-id -f -i ceph.pub root@node-2
+  ssh-copy-id -f -i ceph.pub root@node-3
+
+yum install -y podman
+3.Add OSDs to the cluster:
+
+    ceph orch host add node1
+    ceph orch host add node2
+    ceph orch host add node3
+    
+    ceph orch daemon add osd node1:/dev/sdb
+    ceph orch daemon add osd node1:/dev/sdc
+    ceph orch daemon add osd node2:/dev/sdb
+    ceph orch daemon add osd node2:/dev/sdc
+    ceph orch daemon add osd node3:/dev/sdb
+    ceph orch daemon add osd node3:/dev/sdc
+
+
+4.Check Ceph status:
+
+    ceph health
+    ceph -s
+
+
+5.Create and configure CephFS:
+
+    ceph osd pool create cephfs_metadata 8
+    ceph osd pool create cephfs_data 8
+    ceph fs new cephfs cephfs_metadata cephfs_data
+    ceph fs ls
+
+
+Step 4: Ceph Client Setup
+
+1.Install Ceph common:
+     sudo yum install -y centos-release-ceph-quincy podma
+    sudo yum install -y ceph-common
+
+
+2.Configure Ceph on the client node:
+
+    scp /etc/ceph/ceph.conf root@client-node:/etc/ceph/
+    scp /etc/ceph/ceph.client.admin.keyring root@client-node:/etc/ceph/
+    sudo chmod +r /etc/ceph/ceph.client.admin.keyring
+
+
+3.Check the health of the Ceph cluster and its detailed status:
+
+    sudo ceph health
+    sudo ceph health detail
+    sudo ceph -s
+
+
+4.Create a Ceph storage pool:
+
+    sudo ceph osd pool create rbd 32 3
+
+
+Step 5: Ceph Client Configuration
+
+1.On the client, create a new block device, disable features that are not compatible with the kernel RBD driver, and map the block device:
+
+    rbd create disk01 --size 4096
+    rbd ls -l
+    modprobe rbd
+    rbd feature disable disk01 exclusive-lock object-map fast-diff deep-flatten
+    rbd map disk01
+    rbd showmapped
+
+
+2.Create a filesystem on the new block device, create a mount point, and mount the block device:
+
+    mkfs.xfs /dev/rbd0
+    mkdir -p /mnt/mydisk
+    mount /dev/rbd0 /mnt/mydisk
+    df -h
+    dd if=/dev/zero of=file1.txt bs=1024 count=220040
+
+
+3.Mount the CephFS:
+
+    sudo mkdir /mnt/cephfs
+    sudo mount -t ceph node1:6789:/ /mnt/cephfs -o name=admin,secretfile=/etc/ceph/ceph.client.admin.keyring
+
+Lustre File System Installation Guide This guide provides step-by-step instructions for installing the Lustre file system on a CentOS 8 environment. 
+
+Please follow the steps carefully to ensure proper configuration. 
+
+Initial Setup: 1. Create four VMs from the Centos-8 Image.
+  2  cd /etc/yum.repos.d/
+    3   sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    4   sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+ 2. Attach an additional HDD to OSS-1, OSS-2, and MGS-MDS VMs. 
+ 
+ Common Operations for All VMs: - Install nano and disable firewalld: 
+     cd /etc/yum.repos.d/ &&  sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && systemctl stop firewalld && systemctl disable firewalld $$ sentenforce 0
+     yum install -y nano && systemctl stop firewalld && systemctl disable firewalld - Disable SELinux: Edit /etc/selinux/config to set SELinux as disabled. Then execute: setenforce 0 - 
+ 
+ 
+ Configure the Lustre repository: Editnano  /etc/yum.repos.d/lustre.repo and add the following: 
+     
+[lustre-server] 
+name=lustre-server 
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/server 
+gpgcheck=0
+[lustre-client] 
+name=lustre-client 
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/client 
+gpgcheck=0 
+
+[e2fsprogs-wc] 
+name=e2fsprogs-wc 
+baseurl=https://downloads.whamcloud.com/public/e2fsprogs/latest/el8 
+gpgcheck=0
+
+ - Update and install Lustre packages: i - Configure network interface: Edit /etc/modprobe.d/lnet.conf and add: options lnet networks="tcp0(ens33)" (replace ens33 with your interface name) Then execute: modprobe lustre lsmod | grep lustre modprobe lnet lsmod | grep lnet lctl network up - Optional: Test network connection (example): lctl ping 192.168.1.34@tcp0 - Reboot all VMs after configuration. 
+ 
+ 
+ Configuration for MDS-MGS VM: - Partition and format the extra attached HDD: fdisk /dev/nvme0n2 mkfs.ext4 /dev/nvme0n2p1 - 
+ Create and mount the Lustre filesystem: mkfs.lustre --reformat --fsname=lustrefs --mgs --mdt --index=0 /dev/nvme0n2p1 
+ mkdir /mnt/mdt 
+ mount -t lustre /dev/nvme0n2p1 /mnt/mdt/ 
+
+
+ Configuration for OSS-OST VM-1: - Prepare the disk and create the OST: mkfs.ext4 /dev/nvme0n2 mkfs.lustre --reformat --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp --index=0 /dev/nvme0n2 mkdir /o
+stoss_mount0 mount -t lustre /dev/nvme0n2 /ostoss_mount0 Configuration for OSS-OST VM-2: - Follow the same steps as for VM-1, but use --index=1 for mkfs.lustre. Configuration for Client VMs: - Ensure connectivity to the MGS node: lctl ping 192.168.1.30@tcp0 - Mount the Lustre filesystem: mkdir /mnt/lustre mount -t lustre 192.168.1.30@tcp0:/lustrefs /mnt/lustre - Test file creation (optional): cd /mnt/lustre dd if=/dev/zero of=filename bs=2G count=
+
+
+
+[root@localhost ~]# history
+    1  ip a
+    2  lsblk
+    3  systemctl stop firewalld
+    4  systemctl disable firewalld
+    5  cd /etc/yum.repos.d/
+    6  ls
+    7  nano luster.repo
+    8  yum update
+    9  yum update && yum upgrade -y e2fsprogs
+   10  yum install -y lsb
+   11  yum install -y lustre-tests
+   12  nano /etc/modprobe.d/lnet.conf
+   13  cat /etc/modprobe.d/lnet.conf
+   14  modprobe lustre
+   15  lsmod | grep lustre
+   16  modprobe lnet
+   17  lsmod | grep lnet
+   18  lctl network up
+   19  lctl list_nids
+   20  mkfs.ext4 /dev/nvme0n3
+   21  mkfs.ext4 /dev/nvme0n2
+   22  df -h
+   23  reboot
+   24  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=0 /dev/nvme0n2
+   25  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=0 /dev/nvme0n3
+   26  mkdir /ostoss_mount
+   27  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=0 /dev/nvme0n3
+   28  mount -t lustre  /dev/nvme0n3 /ostoss_mount
+   29  df -h
+   30  mkfs.ext4 /dev/nvme0n2
+   31  mkfs.ext4 /dev/nvme0n3
+   32  mkdir /ostoss_mount3
+   33  mkdir /ostoss_mount4
+   34  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=2 /dev/nvme0n2
+   35  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=3 /dev/nvme0n3
+   36  mount -t lustre  /dev/nvme0n2 /ostoss_mount3
+   37  mount -t lustre  /dev/nvme0n3 /ostoss_mount4
+   38  ip a
+   39  df -h
+   40  history
+   41  clear
+   42  lsblk
+   43  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=2 /dev/nvme0n2
+   44  history
+   45  mount -t lustre  /dev/nvme0n2 /ostoss_mount3
+   46  modprobe lnet
+   47  mount -t lustre  /dev/nvme0n2 /ostoss_mount3
+   48  modprobe lustre
+   49  mkfs.lustre --ost --fsname=lustrefs --mgsnode=192.168.1.30@tcp0 --index=2 /dev/nvme0n2clear
+   50  clear
+   51  ip a
+   52  reboot
+   53  who
+   54  ip a
+   55  history
+[root@localhost ~]# nano luster.repo
+[root@localhost ~]# cd /etc/yum.repos.d/
+[root@localhost yum.repos.d]# ls
+CentOS-Stream-AppStream.repo  CentOS-Stream-Extras-common.repo     CentOS-Stream-Media.repo       CentOS-Stream-RealTime.repo          luster.repo
+CentOS-Stream-BaseOS.repo     CentOS-Stream-Extras.repo            CentOS-Stream-NFV.repo         CentOS-Stream-ResilientStorage.repo
+CentOS-Stream-Debuginfo.repo  CentOS-Stream-HighAvailability.repo  CentOS-Stream-PowerTools.repo  CentOS-Stream-Sources.repo
+[root@localhost yum.repos.d]# cat luster.repo
+[lustre-server]
+name=lustre-server
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/server
+# exclude=*debuginfo*
+gpgcheck=0
+
+[lustre-client]
+name=lustre-client
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/client
+# exclude=*debuginfo*
+gpgcheck=0
+
+[e2fsprogs-wc]
+name=e2fsprogs-wc
+baseurl=https://downloads.whamcloud.com/public/e2fsprogs/latest/el8
+# exclude=*debuginfo*
+gpgcheck=0
+
+[root@localhost yum.repos.d]#
+[root@localhost yum.repos.d]# cat luster.repo
+[lustre-server]
+name=lustre-server
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/server
+# exclude=*debuginfo*
+gpgcheck=0
+
+[lustre-client]
+name=lustre-client
+baseurl=https://downloads.whamcloud.com/public/lustre/latest-release/el8.9/client
+# exclude=*debuginfo*
+gpgcheck=0
+
+[e2fsprogs-wc]
+name=e2fsprogs-wc
+baseurl=https://downloads.whamcloud.com/public/e2fsprogs/latest/el8
+# exclude=*debuginfo*
+gpgcheck=0
+
+[root@localhost yum.repos.d]# cat /etc/modprobe.d/lnet.conf
+options lnet networks=tcp0(ens160)
+
+Bacula Config
+
+ cd /etc/yum.repos.d/ &&  sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* && sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* && systemctl stop firewalld && systemctl disable firewalld $$ sentenforce 0
+
+============================ BACULA DIR CONFIG ======================================
+
+yum install -y bacula-director  bacula-console mariadb-server nano 
+
+systemctl enable mariadb && systemctl start mariadb && systemctl status mariadb
+
+/usr/libexec/bacula/grant_mysql_privileges    
+/usr/libexec/bacula/create_mysql_database -u root
+/usr/libexec/bacula/make_mysql_tables -u bacula
+
+mysql_secure_installation
+
+alternatives --config libbaccats.so
+select mysql
+
+setenforce 0
+
+systemctl stop firewalld
+
+
+
+
+nano /etc/hosts create host file entry for bacula-dir, bacula-sd and bacula-fd
+
+nano /etc/bacula/bacula-dir.conf
+
+# /etc/bacula/bacula-dir.conf
+#
+# Bacula Director Configuration file
+#
+
+Director {
+  Name = bacula-dir
+  DIRport = 9101
+  QueryFile = "/etc/bacula/query.sql"
+  WorkingDirectory = "/var/spool/bacula"
+  PidDirectory = "/var/run"
+  Maximum Concurrent Jobs = 1
+  Password = "cdac"
+  DirAddress = dr.backup
+}
+
+JobDefs {
+  Name = "DefaultJob"
+  Type = Backup
+  Level = Incremental
+  Client = bacula-fd
+  FileSet = "Full Set"
+  Schedule = "WeeklyCycle"
+  Storage = File
+  Messages = Standard
+  Pool = File
+  Priority = 10
+  Write Bootstrap = "/var/spool/bacula/%c.bsr"
+}
+
+Job {
+  Name = "BackupLocalFiles"
+  JobDefs = "DefaultJob"
+}
+
+Job {
+  Name = "BackupCatalog"
+  JobDefs = "DefaultJob"
+  Level = Full
+  FileSet = "Catalog"
+  Schedule = "WeeklyCycleAfterBackup"
+  RunBeforeJob = "/usr/libexec/bacula/make_catalog_backup.pl MyCatalog"
+  RunAfterJob = "/usr/libexec/bacula/delete_catalog_backup"
+  Write Bootstrap = "/var/spool/bacula/%n.bsr"
+  Priority = 11
+}
+
+# Add the Restore Job resource here
+Job {
+  Name = "RestoreFiles"
+  Type = Restore
+  FileSet = "Full Set"
+  Client=bacula-fd
+  Storage = File
+  Pool = File
+  Messages = Standard
+  Where = /tmp/bacula-restores
+}
+
+FileSet {
+  Name = "Full Set"
+  Include {
+    Options {
+      signature = MD5
+      compression = GZIP
+    }
+    File = /var/www/html/
+  }
+  Exclude {
+    File = /var/spool/bacula
+    File = /tmp
+    File = /proc
+    File = /.journal
+    File = /.fsck
+    File = /bacula
+  }
+}
+
+Schedule {
+  Name = "WeeklyCycle"
+  Run = Full 1st sun at 23:05
+  Run = Differential 2nd-5th sun at 23:05
+  Run = Incremental mon-sat at 23:05
+}
+
+Schedule {
+  Name = "WeeklyCycleAfterBackup"
+  Run = Full sun-sat at 23:10
+}
+
+FileSet {
+  Name = "Catalog"
+  Include {
+    Options {
+      signature = MD5
+    }
+    File = "/var/spool/bacula/bacula.sql"
+  }
+}
+
+Client {
+  Name = bacula-fd
+  Address = client.backup
+  FDPort = 9102
+  Catalog = MyCatalog
+  Password = "cdac"
+  File Retention = 30 days
+  Job Retention = 6 months
+  AutoPrune = yes
+}
+
+Storage {
+  Name = File
+  Address = dr.backup
+  SDPort = 9103
+  Password = "cdac"
+  Device = FileStorage
+  Media Type = File
+}
+
+Catalog {
+  Name = MyCatalog
+  dbname = "bacula"
+  dbuser = "root"
+  dbpassword = "cdac"
+  dbaddress = "localhost"
+  dbport = 3306
+}
+
+Messages {
+  Name = Standard
+  director = bacula-dir = all, !skipped, !restored
+}
+
+Pool {
+  Name = Default
+  Pool Type = Backup
+  Recycle = yes
+  AutoPrune = yes
+  Volume Retention = 365 days
+}
+
+Pool {
+  Name = File
+  Pool Type = Backup
+  Label Format = Local-
+  Recycle = yes
+  AutoPrune = yes
+  Volume Retention = 30 days
+  Maximum Volume Bytes = 10G
+  Maximum Volumes = 100
+}
+
+Pool {
+  Name = Scratch
+  Pool Type = Backup
+}
+
+Console {
+  Name = bacula-mon
+  Password = "cdac"
+  CommandACL = status, .status
+}
+
+bacula-dir -tc /etc/bacula/bacula-dir.conf
+systemctl enable bacula-dir &&  systemctl start bacula-dir &&  systemctl status bacula-dir  
+=============================== BACULA -SD CONFIG ==========================================
+ mkfs.ext4 /dev/nvme0n2                        
+ mkdir /bacula
+mount /dev/nvme0n2 /bacula/
+mkdir -p /bacula/backup /bacula/restore
+yum install -y  bacula-storage
+chown -R bacula:bacula /bacula
+chmod -R 700 /bacula
+
+ 
+
+# /etc/bacula/bacula-sd.conf
+#
+# Bacula Storage Daemon Configuration file
+#
+
+Storage {
+  Name = bacula-sd
+  SDPort = 9103
+  WorkingDirectory = "/var/spool/bacula"
+  Pid Directory = "/var/run"
+  Maximum Concurrent Jobs = 20
+  SDAddress = dr.backup
+}
+
+Director {
+  Name = bacula-dir
+  Password = "cdac"
+}
+
+Director {
+  Name = bacula-mon
+  Password = "cdac"
+  Monitor = yes
+}
+
+Device {
+  Name = FileStorage
+  Media Type = File
+  Archive Device = /bacula/backup
+  LabelMedia = yes
+  Random Access = Yes
+  AutomaticMount = yes
+  RemovableMedia = no
+  AlwaysOpen = no
+}
+
+Messages {
+  Name = Standard
+  director = bacula-dir = all
+}
+
+
+systemctl enable bacula-sd &&  systemctl start bacula-sd &&  systemctl status bacula-sd
+========================================  Bacula-FD Config
+yum install -y  bacula-client  nano httpd
+
+# /etc/bacula/bacula-fd.conf
+#
+# Bacula File Daemon Configuration file
+#
+
+Director {
+  Name = bacula-dir
+  Address = dr.backup
+  Password = "cdac"
+}
+
+FileDaemon {
+  Name = bacula-fd
+  FDport = 9102
+  WorkingDirectory = /var/spool/bacula
+  Pid Directory = /var/run
+  Maximum Concurrent Jobs = 20
+}
+
+Messages {
+  Name = Standard
+  director = bacula-dir = all, !skipped, !restored
+}
+
+bacula-fd -tc /etc/bacula/bacula-fd.conf
+ systemctl enable bacula-fd &&  systemctl start bacula-fd &&  systemctl status bacula-fd 
+=================================== Bconsole Config
+nano /etc/bacula/bconsole.conf
+#
+# Bacula User Agent (or Console) Configuration File
+#
+# Copyright (C) 2000-2015 Kern Sibbald
+# License: BSD 2-Clause; see file LICENSE-FOSS
+#
+
+Director {
+  Name = bacula-dir
+  DIRport = 9101
+  address = <dir hostname>
+  Password = "cdac"
+}
+
+
+bconsole
+label
+run
+
+status director
+
+restore all
+
+dnf install @postgresql:13
+/usr/bin/postgresql-setup --initdb
+systemctl start postgresql
+https://docs.bareos.org/master/IntroductionAndTutorial/InstallingBareos.html#install-on-redhat-based-linux-distributions
+systemctl stop firewalld.
+setenforce 0
+systemctl enable bareos-dir && systemctl start bareos-dir && systemctl status bareos-dir
+systemctl enable bareos-sd && systemctl start bareos-sd && systemctl status bareos-sd
+systemctl enable bareos-fd && systemctl start bareos-fd && systemctl status bareos-fd
+dnf install bareos-webui
+cd /etc/bareos/bareos-dir.d/console/
+mv admin.conf.example admin.conf
+systemctl restart bareos-dir
+systemctl start httpd
+
+http://192.168.154.158/bareos-webui/
+
+/etc/bareos/bareos-dir.d/fileset
+change backup parameter
+systemctl restart bareos-dir
+
+
