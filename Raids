@@ -1,0 +1,263 @@
+
+------------------------------------------------------------------------------------------------------------------------
+
+**** RAID-0 LAB ****
+
+
+# Create CentOS VM. 
+# Take a snapshot. If possible create a clone.
+# Shut it down and add 2 hdd of 10GB[you can choose disk size as per your wish].
+# Power on system
+
+# RUN following commands:
+	
+	ip r 		// to check if you are getting IP
+	curl www.google.com 		// to check if your internet is working
+
+	*****
+	if you are not getting IP for you system or no output for "curl www.google.com" then run this cmd:
+
+		>	dhclient
+	*****
+
+
+	# to check if disk can gets detected
+	lsblk     			
+	# RAID config package. IMP part!!
+	yum install mdadm -y
+	# to create RAID 0 config for the drive "sdb" and "sdc"
+	mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/sdc    
+	# to check the status of the config process
+	cat /proc/mdstat
+	# examine each drive 
+	mdadm --examine /dev/sdb
+	mdadm --examine /dev/sdc
+	# this cmd can help you to check any failed hard drive and current status of your RAID 0 configdrives
+	mdadm --detail /dev/md0
+	# to format the drive in "ext4" file system
+	mkfs.ext4 /dev/md0
+	# create dir to mount drive
+	mkdir /mnt/raid0
+	# mount your drive with dir
+	mount /dev/md0 /mnt/raid0
+  	# goto /mnt/raid0
+  	cd /mnt/raid0
+  	#create a file
+  	vi hpcsa
+  		"HELLO WORLD!!"
+  	:wq
+  	# to check files in /mnt/raid0	 
+  	ls –la /mnt/raid0
+
+	mdadm --detail --scan  --verbose   
+
+##### To check if you loose file in RAID 0 config  #####
+
+# you already created file "hpcsa"
+# So, just shutdown your system.
+# Remove one drive from VM setting
+# Power on system.
+# run this cmd
+	ls /mnt/raid0
+# Can you see file named "hpcsa" ???
+
+# If you can't then thats good! Ghabrana nai!! Pass ho! 
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+**** RAID-1 LAB ****
+
+
+# Create CentOS VM. 
+# Take a snapshot. If possible create a clone.
+# Shut it down and add 2 hdd of 10GB [you can choose disk size as per your wish].
+# Power on system
+
+# RUN following commands:
+	
+	ip r 		// to check if you are getting IP
+	curl www.google.com 		// to check if your internet is working
+
+	*****
+	if you are not getting IP for you system or no output for "curl www.google.com" then run this cmd:
+
+		>	dhclient
+	*****
+
+
+	# to check if disk can gets detected
+	lsblk     			
+	# RAID config package. IMP part!!
+	yum install mdadm -y
+	# to create RAID 1 config for the drive "sdb" and "sdc"
+	mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc   
+
+	# if asked >>> Continue creating array? y
+
+	# to check the status of the config process
+	cat /proc/mdstat
+	# examine each drive 
+	mdadm --examine /dev/sdb
+	mdadm --examine /dev/sdc
+	# this cmd can help you to check any failed hard drive and current status of your RAID 1 configdrives
+	mdadm --detail /dev/md0
+	# to format the drive in "ext4" file system
+	mkfs.ext4 /dev/md0
+	# create dir to mount drive
+	mkdir /mnt/raid1
+	# mount your drive with dir
+	mount /dev/md0 /mnt/raid1
+  	# goto /mnt/raid1
+  	cd /mnt/raid1
+  	#create a file
+  	vi hpcsa
+  		"HELLO WORLD!!"
+  	:wq
+  	# to check files in /mnt/raid0	 
+  	ls –la /mnt/raid1
+
+  	# try it :P
+	mdadm --detail --scan  --verbose   
+
+
+##### To add drive to RAID 1 #####
+
+# Now you can add drive again for raid 1 config
+# power off your system and add hdd drive of 10GB  
+# power on system
+# cmd to check if drive has been detected
+	lsblk 
+# cmd to add drive to raid 1 config
+	mdadm --manage /dev/md0 --add /dev/sdc
+# check if the drive gets added.. check the bottom of the output!
+	mdadm --detail /dev/md0
+
+
+
+##### To check if you loose file in RAID 1 config  #####
+
+# you already created file "hpcsa"
+# So, just shutdown your system.
+# Remove one drive from VM setting
+# Power on system.
+# mount the drive again by running this cmd:
+	mount /dev/md0 /mnt/raid1
+
+# check file in dir /mnt/raid5
+	ls /mnt/raid1
+# if you can see file named "hpcsa" then check its content
+	cat /mnt/raid1/hpcsa
+# You can see the content of the file, can't you?? :|
+
+
+------------------------------------------------------------------------------------------------------------------------	
+
+**** RAID-5 LAB ****
+
+# Create CentOS VM. 
+# Take a snapshot. If possible create a clone.
+# Shut it down and add 4 hdd of 10GB [you can choose disk size as per your wish].
+# Power on system
+
+# RUN following commands:
+	
+	ip r 		// to check if you are getting IP
+	curl www.google.com 		// to check if your internet is working
+
+	*****
+	if you are not getting IP for you system or no output for "curl www.google.com" then run this cmd:
+
+		>	dhclient
+	*****
+
+
+
+	# to check if disk can gets detected
+	lsblk     			
+	# RAID config package. IMP part!!
+	yum install mdadm -y
+	# to create RAID 5 config for the drive "sdb" and "sdc"
+	mdadm --create --verbose /dev/md0 --level=5 --raid-devices=3 /dev/sdb /dev/sdc /dev/sdd --spare-devices=1 /dev/sde  
+	# to check the status of the config process. 
+	cat /proc/mdstat
+ 	# let the recovery get to 100% for the cmd "cat /proc/mdstat"
+
+
+----------------------- DO NOT COPY THIS !!!!!!! --------------------------
+ 	Personalities : [raid6] [raid5] [raid4]
+	md0 : active raid5 sdd[4] sde[3](S) sdc[1] sdb[0]
+      41908224 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
+      [===================>.]  recovery = 96.1% (20137472/20954112) finish=0.0min speed=204416K/sec
+-----------------------------------------------------------------------------
+
+
+
+
+
+	# examine each drive 
+	mdadm --examine /dev/sdb
+	mdadm --examine /dev/sdc
+	# this cmd can help you to check any failed hard drive and current status of your RAID 1 configdrives
+	mdadm --detail /dev/md0
+	# to format the drive in "ext4" file system
+	mkfs.ext4 /dev/md0
+	# create dir to mount drive
+	mkdir /mnt/raid5
+	# mount your drive with dir
+	mount /dev/md0 /mnt/raid5
+  	# goto /mnt/raid5
+  	cd /mnt/raid5
+  	#create a file
+  	vi hpcsa
+  		"HELLO WORLD!!"
+  	:wq
+  	# to check files in /mnt/raid0	 
+  	ls –la /mnt/raid5
+
+
+  	# try it :P
+	mdadm --detail --scan  --verbose   
+
+
+##### To add drive in RAID 5 Config #####
+
+# Now you can add drive again for raid 5 config
+# power off your system and add 1 hdd drive of 10GB  
+# power on system
+# cmd to check if drive has been detected
+	lsblk 
+# cmd to add drive to raid 5 config
+	mdadm --manage /dev/md0 --add /dev/sdf
+
+# check if the drive gets added.. check the bottom of the output!
+	mdadm --detail /dev/md0
+
+
+
+##### To check if you loose file in RAID 5 config  #####
+
+# you already created file "hpcsa"
+# So, just shutdown your system.
+# Remove one drive from VM setting
+# Power on system.
+# mount the drive again by running this cmd:
+	mount /dev/md0 /mnt/raid5
+# to check the status of the config process. 
+	cat /proc/mdstat 
+# let the recovery get to 100% for the cmd "cat /proc/mdstat"	
+
+
+# check file in dir /mnt/raid5
+	ls /mnt/raid5
+# if you can see file named "hpcsa" then check its content
+	cat /mnt/raid5/hpcsa
+# You can see the content of the file... I believe so :/
+
+
+
+#### SAYONARA ~~~~~~~
