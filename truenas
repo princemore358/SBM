@@ -1,0 +1,41 @@
+TRUENAS
+vm => i will install later => OS:other, version:other => vm name => processors :2 => ram 16 gb =>next => NVMe =>next => 10 gb => finish. 
+right click : CD/DVD- select truenas iso
+
+Power on :
+Install/upgrade: enter
+space 
+enter
+Boot via BIOS
+wait for process to complete then ok
+shutdown system
+
+2 hdd 10gb NVMe => power on => wait for process then
+ip will be shown
+
+go to browser: enter ip
+
+login
+Storage=> pool =>create pool =>pooolname:  pool1 : select all disks : first arrow(->) : ok
+
+Sharing=> Block share => name : ....org.hpcsa => save
+
+portals 
+1) wizard => name: dhpcsa => extent type : file  :path to extent: /mnt/pool1/wizpath => file  size :2G 
+2) portal => ip : 0.0.0.0 => next, next, submit
+
+initiators Group : 
+
+then in windows search:
+iscsi emulator : configuration : copy initiator name
+
+then go to chrome 
+initaiator : 3dot : untik Allow all : paste clock 
+(+) 
+
+then in iscsi portal : discvery : discover portal : put ip of vm
+
+target : select target : connect : ok
+
+then search disk manager : GPT : ok
+see the disk wil be added.
