@@ -1,0 +1,100 @@
+
+
+# Create CentOS VM. 
+# Take a snapshot. If possible create a clone.
+# Shut it down and add 2 hdd of 10GB[you can choose disk size as per your wish].
+# Power on system
+
+--> Now your system is READY!!!
+
+
+# to create a physical volume
+pvcreate /dev/sdb /dev/sdc
+# to check the created physical volume
+pvdisplay
+# to create volume group
+vgcreate HPCSA /dev/sdb /dev/sdc
+
+# to create a logical volume
+lvcreate -n hpcsa_lab --size 1G HPCSA
+
+
+# After creating logical volume we need to create partition
+fdisk /dev/mapper/HPCSA-hpcsa_lab
+
+type n and press <ENTER>
+type w and press <ENTER>
+
+
+
+# format the volume with ext4 file system
+mkfs.ext4 /dev/mapper/HPCSA-hpcsa_lab
+
+# mount the logical volume
+mkdir /mnt/lab
+mount /dev/mapper/HPCSA-hpcsa_lab /mnt/lab/
+# check if gets mounted
+df -Th
+
+
+######################## to resize to extend logical volume ########################  
+
+# to extend 10GB
+lvextend -L +10G /dev/mapper/HPCSA-hpcsa_lab
+resize2fs /dev/mapper/HPCSA-hpcsa_lab
+
+# to check if it gets extended
+df -Th
+
+
+######################## to take snapshot of logical volume ########################  
+
+# create a file name "hello" and content into it
+vi /mnt/lab/hello
+	type this sentence or any sentence
+:wq
+
+ll /mnt/lab	
+
+# to create a snapshot
+lvcreate -L 1G -s -n hpcsa_snap /dev/mapper/HPCSA-hpcsa_lab
+
+
+# now remove the file
+rm /mnt/lab/hello
+# type "y" to remove file
+
+ll /mnt/lab/
+
+# to check status of logical volume
+lvdisplay /dev/mapper/HPCSA-hpcsa_snap
+
+# unmount logical volume and snapshot
+umount /dev/mapper/HPCSA-hpcsa_lab
+umount /dev/mapper/HPCSA-hpcsa_snap
+
+
+# deactivate the logical volume
+lvchange -an /dev/mapper/HPCSA-hpcsa_lab
+
+# merge the snapshot with logical volume
+lvconvert --merge /dev/mapper/HPCSA-hpcsa_snap
+
+# activate the logical volume
+lvchange -ay /dev/mapper/HPCSA-hpcsa_lab
+
+# mount the logical volume
+mount /dev/mapper/HPCSA-hpcsa_lab /mnt/lab/
+
+# check the file "hello"
+ll /mnt/lab
+
+# if file exist...volla!!!! You have successfully merged the snapshot!!!!
+
+
+
+
+
+#### OPTIONAL COMMAND ####
+#### HIGHLY RECOMMENDED FOR VETERANS ONLY ####
+lvresize -rl +100%FREE /dev/mapper/HPCSA-hpcsa_lab
